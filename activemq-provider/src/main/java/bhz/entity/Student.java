@@ -16,6 +16,19 @@ public class Student {
 
     private String address;
 
+    private String headUrl;
+
+    private String classId;
+
+
+    public String getHeadUrl() {
+        return headUrl;
+    }
+
+    public void setHeadUrl(String headUrl) {
+        this.headUrl = headUrl;
+    }
+
     public String getUsername() {
         return username;
     }

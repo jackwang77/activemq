@@ -10,7 +10,7 @@ public class School {
 
     private String schoolName;
 
-    private String code;
+   private String musicName;
 
     public Integer getId() {
         return Id;
@@ -28,11 +28,11 @@ public class School {
         this.schoolName = schoolName;
     }
 
-    public String getCode() {
-        return code;
+    public String getMusicName() {
+        return musicName;
     }
 
-    public void setCode(String code) {
-        this.code = code;
+    public void setMusicName(String musicName) {
+        this.musicName = musicName;
     }
 }
