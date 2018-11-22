@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--第三方MQ工厂-->
+    <bean class="org.apache.activemq.ActiveMQConnectionFactory" id="activeMQConnectionFactory">
+        <property name="brokerURL" value="tcp:192.168.18.212:61616"/>
+        <property name="userName" value="wangjun"/>
+        <property name="password" value="123456"/>
+    </bean>
+    <!--
+    ActiveMQ为我们提供了一个PooledConnectionFacroty,通过往里面注入一个ACtiveMQConnectionFactory
+    可以采用将Connection session和MessageProducer,这样可以大大的减少我们的资源消耗,要依赖于activemq-pool包
+    -->
+    <bean class="org.apache.activemq.pool.PooledConnectionFactory" id="pooledConnectionFactory">
+        <property name="connectionFactory" ref="activeMQConnectionFactory"/>
+        <property name="maxConnections" value="10"/>
+    </bean>
+
+    <!-- Spring 用于管理真正的ConnectionFactory-->
+    <bean class="org.springframework.jms.connection.SingleConnectionFactory" id="connectionFactory">
+        <property name="targetConnectionFactory" ref="pooledConnectionFactory"/>
+    </bean>
+
+    <!--Spring提供的JMS工具类,它可以进行消息发送、接收等-->
+    <!--队列模板-->
+    <bean class="org.springframework.jms.core.JmsTemplate" id="jmsTemplate">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="defaultDestinationName" value="mailQueue"/>
+    </bean>
+    <!--这个是我们目的地-->
+    <bean class="org.apache.activemq.command.ActiveMQQueue" id="mailQueue">
+        <constructor-arg>
+            <value>mainQueue</value>
+        </constructor-arg>
+    </bean>
+    <!--配置自定义监听:MessageListener-->
+    <bean class="bhz.mq.MailQueueMessageListener" id="mailQueueMessageListener"/>
+
+    <!-- 将连接工厂、目标对象、自定义监听注入JMS模板-->
+    <bean class="org.springframework.jms.listener.DefaultMessageListenerContainer" id="messageListenerContainer">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="destination" ref="mailQueue"/>
+        <property name="messageListener" ref="mailQueueMessageListener"/>
+    </bean>
+
+</beans>
